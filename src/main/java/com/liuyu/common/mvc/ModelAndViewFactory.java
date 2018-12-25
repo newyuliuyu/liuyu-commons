@@ -38,10 +38,12 @@ public class ModelAndViewFactory {
     }
 
     public static ModelAndViewFactory instance() {
-        return new ModelAndViewFactory("");
+        return instance("");
     }
 
     public static ModelAndViewFactory instance(String view) {
-        return new ModelAndViewFactory(view);
+        ModelAndViewFactory factory = new ModelAndViewFactory(view);
+        factory.with(Responser.ModelName, new Responser.Builder().success().create());
+        return factory;
     }
 }
