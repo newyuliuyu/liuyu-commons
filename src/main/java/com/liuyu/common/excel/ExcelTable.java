@@ -13,6 +13,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellRangeAddressList;
+import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,6 +175,10 @@ public class ExcelTable {
         Preconditions.checkNotNull(sheetName, "工作簿名称不能为空");
         sheet = wb.createSheet(sheetName);
         return this;
+    }
+
+    public Sheet getSheet() {
+        return sheet;
     }
 
     public ExcelTable changeSheet(String sheetName) {
@@ -350,6 +356,22 @@ public class ExcelTable {
 
     public ExcelTable mergeCells(int firstRowIdx, int lastRowIdx, int firstColIdx, int lastColIdx) {
         sheet.addMergedRegion(new CellRangeAddress(firstRowIdx, lastRowIdx, firstColIdx, lastColIdx));
+        return this;
+    }
+
+    public ExcelTable createDropDownMenu(int firstRowIdx, int lastRowIdx, int firstColIdx, int lastColIdx, String[] data) {
+        DataValidationHelper helper = sheet.getDataValidationHelper();
+        DataValidationConstraint constraint = helper.createExplicitListConstraint(data);
+        CellRangeAddressList addressList = new CellRangeAddressList(firstRowIdx, lastRowIdx, firstColIdx, lastColIdx);
+        DataValidation dataValidation = helper.createValidation(constraint, addressList);
+        //处理Excel兼容性问题
+        if (dataValidation instanceof XSSFDataValidation) {
+            dataValidation.setSuppressDropDownArrow(true);
+            dataValidation.setShowErrorBox(true);
+        } else {
+            dataValidation.setSuppressDropDownArrow(false);
+        }
+        sheet.addValidationData(dataValidation);
         return this;
     }
 
